@@ -1,46 +1,57 @@
-#include <iostream>
-using namespace std;
-const int col_razr = 3;
-int velich_razr(int chislo, int razr)
-{
-    while (razr > 1)
-    {
-        chislo /= 10;
-        razr--;
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+#define MAXWORD 100
+struct tnode {
+    char* word;
+    int count;
+    struct tnode* left;
+    struct tnode* right;
+};
+struct tnode* addtree(struct tnode* p, char* w) {
+    int cond;
+    if (p == NULL) {
+        p = (struct tnode*)malloc(sizeof(struct tnode));
+        p->word = _strdup(w);
+        p->count = 1;
+        p->left = p->right = NULL;
     }
-    return chislo % 10;
+    else if ((cond = strcmp(w, p->word)) == 0)
+        p->count++;
+    else if (cond < 0)
+        p->left = addtree(p->left, w);
+    else
+        p->right = addtree(p->right, w);
+    return p;
 }
-
-void sort_razr(int dop_mas[10][10], int mas[10], int razr)
-{
-    int mas_col[10], i, j, temp = 0;
-    for (i = 0; i < 10; i++)
-        mas_col[i] = 0;
-    for (i = 0; i < 10; i++)
-    {
-        int a = velich_razr(mas[i], razr);
-        dop_mas[mas_col[a]][a] = mas[i];
-        mas_col[a]++;
-    }
-    for (i = 0; i < 10; i++)
-    {
-        for (j = 0; j < mas_col[i]; j++)
-        {
-            mas[temp] = dop_mas[j][i];
-            temp++;
-        }
+void freemem(tnode* tree) {
+    if (tree != NULL) {
+        freemem(tree->left);
+        freemem(tree->right);
+        free(tree->word);
+        free(tree);
     }
 }
-
-int main()
-{
-    setlocale(LC_ALL, "rus");
-    int razr, i;
-    int mas[10] = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
-    int dop_mas[10][10];
-    for (razr = 1; razr < 4; razr++)
-        sort_razr(dop_mas, mas, razr);
-    for (i = 0; i < 10; i++)
-        cout << mas[i] << endl;
+void treeprint(struct tnode* p) {
+    if (p != NULL) {
+        treeprint(p->left);
+        printf("%d %s\n", p->count, p->word);
+        treeprint(p->right);
+    }
+}
+int main() {
+    struct tnode* root;
+    char word[MAXWORD];
+    root = NULL;
+    do {
+        scanf_s("%s", word, MAXWORD);
+        if (isalpha(word[0]))
+            root = addtree(root, word);
+    } while (word[0] != '0');
+    treeprint(root);
+    freemem(root);
+    getchar();
+    getchar();
     return 0;
 }
